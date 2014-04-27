@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>gridersize</title>
+	<script type="text/javascript" src="deps/jquery-2.1.0.min.js"></script>
+	<script type="text/javascript" src="deps/jquery.mousewheel.min.js"></script>
+	<script type="text/javascript" src="src/gridersize.js"></script>
+	<style type="text/css">
+
+		#canvas {
+			height: 500px; 
+			width: 500px; 
+			background-color: gray;
+		}
+
+		.alpha {
+			background-color: green;
+		}
+
+		.beta {
+			background-color: red;
+		}
+
+	</style>
+</head>
+<body>
+<div id="canvas"></div>
+<script type="text/javascript">
+
+	//create a gridersize object
+	var grid = new gridersize("#canvas"); 
+	
+	grid
+	.render([
+		[-5, -5, 10, 10, ["NB 271", "NB 270"], {"border": true, "class": "student", "active-class": "beta", "label": "The creators home"}], 
+		[0, 0, 10, 10, ["alpha"], {"border": true, "class": "student2", "active-class": "alpha",  "label": "The creators home"}]
+	]) //add some things to render
+	.keys() //register keyboard shortcuts
+	.mouse() //register mouse shortcuts
+	.showAll();  //set the zoom Level to show everything
+
+	window.grid = grid; 
+</script>
+<a href="doc/index.html">Documentation</a>
+</body>
+</html>
