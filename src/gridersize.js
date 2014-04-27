@@ -17,7 +17,7 @@ var gridersize = function(canvas){
 	this.zoom = 1;
 
 	//canvas
-	this.canvas = $(canvas).css("overflow", "none"); 
+	this.canvas = $(canvas).css("overflow", "hidden"); 
 
 	//center
 	this.center = {
@@ -106,47 +106,14 @@ gridersize.prototype.draw = function(){
 			"maxY": (element[1] - center.y)*zoom+element[3]*zoom, 
 			"sizeY": element[3]*zoom
 		}; 
-
-		//does the box fit inside the canvas?
-
-		var fitsX = (renderDimensions.minX >= -dimX || renderDimensions.maxX <= dimX); 
-		var fitsY = (renderDimensions.minY >= -dimY || renderDimensions.maxY <= dimY); 
-
-		if(fitsX && fitsY){
-			//adjust x coords
-			if(renderDimensions.minX < -dimX){
-				renderDimensions.minX = -dimX; 
-			}
-
-			if(renderDimensions.maxX > dimX){
-				renderDimensions.maxX = dimX; 
-			}
-
-			renderDimensions.sizeX = renderDimensions.maxX - renderDimensions.minX; 
-
-			//adjust y coords
-			if(renderDimensions.minY < -dimY){
-				renderDimensions.minY = -dimY; 
-			}
-
-			if(renderDimensions.maxY > dimY){
-				renderDimensions.maxY = dimY; 
-			}
-
-			renderDimensions.sizeY = renderDimensions.maxY - renderDimensions.minY; 
-
-			//set the properties on the object
-
-			box.show().css({
-				"position": "absolute", 
-				"top": renderDimensions.minY, 
-				"left": renderDimensions.minX, 
-				"width": renderDimensions.sizeX, 
-				"height": renderDimensions.sizeY
-			}); 
-		} else {
-			box.hide(); 
-		}
+		
+		box.css({
+			"position": "absolute", 
+			"top": renderDimensions.minY, 
+			"left": renderDimensions.minX, 
+			"width": renderDimensions.sizeX, 
+			"height": renderDimensions.sizeY
+		}); 
 		
 	}); 
 
