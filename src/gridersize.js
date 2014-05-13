@@ -150,6 +150,7 @@ gridersize.prototype._drawElements = function(){
 			var box = $("<div>")
 			.data("gridersize.id", id)
 			.data("gridersize.position", [element[0], element[1], element[2], element[3]])
+			.data("gridersize.clicked", false)
 			.appendTo(origin); 
 
 
@@ -169,17 +170,28 @@ gridersize.prototype._drawElements = function(){
 			})
 			.on("click", function(){
 
-				me.canvas.trigger("gridersize.click", [box, id]); 
+				//trigger a click event and a toggle event
+				me.canvas.trigger("gridersize.click", [box, id]);
+
+				box.trigger("gridersize.toggle"); 
+			})
+			.on("gridersize.toggle", function(){
+				//toggle this box	
+
+				me.canvas.trigger("gridersize.toggle", [box, id]);
 
 				if(box.data("gridersize.clicked") === true){
 					box
 					.data("gridersize.clicked", false)
 					.trigger("gridersize.deactivate"); 
 				} else {
+					me.canvas.trigger("gridersize.focus", [box, id]); 
 
 					box.parent().find("div").each(function(){
 						if($(this).data("gridersize.active") === true){
-							$(this).trigger("gridersize.deactivate"); 
+							$(this)
+							.data("gridersize.clicked", false)
+							.trigger("gridersize.deactivate"); 
 						}
 					}); 
 
@@ -419,6 +431,8 @@ gridersize.prototype.mouse = function(){
 			)
 			.draw(); 
 		}
+
+		me.canvas.trigger("dragmove"); 
 	}; 
 
 	var mouseDown = function(event){
@@ -428,11 +442,15 @@ gridersize.prototype.mouse = function(){
 			dragStart = [me.center.x, me.center.y];
 			dragOrigin = [event.pageX, event.pageY]; 
 		}
+
+		me.canvas.trigger("dragstart"); 
 	}; 
 
 	var mouseEnd = function(){
 		dragStart = undefined; 
 		dragOrigin = undefined; 
+
+		me.canvas.trigger("dragstop"); 
 	}; 
 
 	this.canvas
