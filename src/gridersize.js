@@ -2,6 +2,10 @@
  * gridersize, version 1.0
  * (c) Tom Wiesing 2014
  * Licensed under MIT
+**/
+
+
+/**
  * @constructor
  * @param {jQuery} canvas A jQuery element to use as canvas, preferably a div. 
  * @return 
@@ -301,7 +305,7 @@ gridersize.prototype._drawElements = function(){
 
 /**
  * Sets the zoom level. 
- * @param {} level Factor to set the zoom to. 
+ * @param {number} level Factor to set the zoom to. 
  * @return ThisExpression
  */
 gridersize.prototype.setZoom = function(level){
@@ -349,11 +353,11 @@ gridersize.prototype.setCenter = function(x, y, relative){
 
 /**
  * Shows a specific Region. 
- * @param {} minX Minimal X Coordinate to show. 
- * @param {} maxX Maximal X Coordinate to show. 
- * @param {} minY Minimal Y Coordinate to show 
- * @param {} maxY Maximal Y Coordinate to show 
- * @param {} [margin=5] Margin to use. Defaults to 5. 
+ * @param {number} minX Minimal X Coordinate to show. 
+ * @param {number} maxX Maximal X Coordinate to show. 
+ * @param {number} minY Minimal Y Coordinate to show 
+ * @param {number} maxY Maximal Y Coordinate to show 
+ * @param {number} [margin=5] Margin to use. Defaults to 5. 
  * @return ThisExpression
  */
 gridersize.prototype.showRegion = function(minX, maxX, minY, maxY, margin){
@@ -384,7 +388,7 @@ gridersize.prototype.showRegion = function(minX, maxX, minY, maxY, margin){
 /**
  * Shows everything that is currently on the screen. 
  * Changes zoom and center. 
- * @param {} [margin=5] Margin to use. 
+ * @param {number} [margin=5] Margin to use. 
  * @return ThisExpression
  */
 gridersize.prototype.showAll = function(margin){
@@ -489,11 +493,20 @@ gridersize.prototype.mouse = function(){
 	return this; 
 }
 
+/**
+ * Finds an element given its Id. 
+ * @param {string} id Id to find. 
+ * @return jQuery
+ */
 gridersize.prototype.findElementById = function(id){
 	return this.canvas.find("div").filter(function(){try{return $(this).data("gridersize.id").indexOf(id) !== -1; }catch(e){return false; }}); 
 }
 
+/**
+ * @static Version number
+*/
 gridersize.version = "1.0"; 
+
 
 gridersize.prototype.doTheThing = function(){
 	alert("I'm just doing my thing. Move along. "); 
