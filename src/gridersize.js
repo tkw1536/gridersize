@@ -95,7 +95,8 @@ gridersize.prototype.draw = function(){
 		"top": height / 2, 
 		"left": width / 2
 	}).children().each(function(){
-		var box = $(this); 
+		var box = $(this);
+
 		var element = box.data("gridersize.position"); 
 
 		//compute properties of elements to render
@@ -118,6 +119,24 @@ gridersize.prototype.draw = function(){
 			"width": renderDimensions.sizeX, 
 			"height": renderDimensions.sizeY
 		}); 
+
+		//optimize the font size
+
+		//find the sub span and reset the font size
+		var sub = box.find("span").css("font-size", "1em");  
+
+		//max number of adjustment steps
+	   	var fontstep = 2;
+	   	var count = 10;
+
+		while (sub.height()>box.height() || sub.width()>box.width()){
+			var s = parseInt(sub.css('font-size').substr(0,2)); 
+			sub.css('font-size',((s-fontstep)) + 'px').css('line-height',((s)) + 'px');
+
+			if(count-- <= 0){
+				break; 
+			}
+		}
 		
 	}); 
 
@@ -292,6 +311,16 @@ gridersize.prototype._drawElements = function(){
 				box.removeClass(activeClass); 
 			}); 
 
+			/*
+				Set the content
+			*/
+
+			var text = properties["label"] || false; 
+
+			if(typeof text == "string"){
+				box.append($("<span>").text(text)); 
+			}
+
 		}).call(this, this.content[i]); 
 	}
 
@@ -463,6 +492,9 @@ gridersize.prototype.mouse = function(){
 		}
 
 		me.canvas.trigger("dragstart"); 
+
+		//set moveable cursor
+		$('html,body').css('cursor','move');
 	}; 
 
 	var mouseEnd = function(){
@@ -470,6 +502,9 @@ gridersize.prototype.mouse = function(){
 		dragOrigin = undefined; 
 
 		me.canvas.trigger("dragstop"); 
+
+		//set normal cursor
+		$('html,body').css('cursor','initial');
 	}; 
 
 	this.canvas
