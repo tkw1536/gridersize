@@ -325,54 +325,6 @@ gridersize.prototype.setZoom = function(level){
 }
 
 /**
- * Shows everything that is currently on the screen. 
- * Changes zoom and center. 
- * @return ThisExpression
- */
-gridersize.prototype.showAll = function(){
-
-
-	var minX = Infinity; 
-	var maxX = -Infinity; 
-
-	var minY = Infinity; 
-	var maxY = -Infinity;
-
-	for(var i=0;i<this.content.length;i++){
-		(function(element){
-			minX = Math.min(element[0], minX); 
-			maxX = Math.max(element[0]+element[2], maxX);
-
-			minY = Math.min(element[1], minY); 
-			maxY = Math.max(element[1]+element[3], maxY);
-		}).call(this, this.content[i]); 
-	}
-
-
-	//get max and mins correctly
-
-	//center in the middle of everything
-
-	var centerX = minX+((maxX - minX)/ 2);
-	var centerY = minY+((maxY - minY)/ 2); 
-
-	//compute zoom and have a margin of 5 units
-	var width = this.canvas.width(); 
-	var height = this.canvas.height(); 
-
-	var zoomX = width/(maxX - minX + 5); 
-	var zoomY = height/(maxY - minY + 5); 
-
-	this
-	.setCenter(centerX, centerY)
-	.setZoom(Math.min(zoomX, zoomY))
-	.draw(); 
-
-
-	return this; 
-}
-
-/**
  * Description
  * @param {number} x X-coordinate of the center. 
  * @param {number} y Y-coordinate of the center. 
@@ -391,6 +343,69 @@ gridersize.prototype.setCenter = function(x, y, relative){
 		this.center.x = x; 
 		this.center.y = y; 
 	}
+
+	return this; 
+}
+
+/**
+ * Shows a specific Region. 
+ * @param {} minX Minimal X Coordinate to show. 
+ * @param {} maxX Maximal X Coordinate to show. 
+ * @param {} minY Minimal Y Coordinate to show 
+ * @param {} maxY Maximal Y Coordinate to show 
+ * @param {} [margin=5] Margin to use. Defaults to 5. 
+ * @return ThisExpression
+ */
+gridersize.prototype.showRegion = function(minX, maxX, minY, maxY, margin){
+	if(typeof margin !== "number"){
+		var margin = 5; 
+	}
+
+	//center in the middle of the region
+
+	var centerX = minX+((maxX - minX)/ 2);
+	var centerY = minY+((maxY - minY)/ 2); 
+
+	//compute zoom and have a margin of 5 units
+	var width = this.canvas.width(); 
+	var height = this.canvas.height(); 
+
+	var zoomX = width/(maxX - minX + margin); 
+	var zoomY = height/(maxY - minY + margin); 
+
+	this
+	.setCenter(centerX, centerY)
+	.setZoom(Math.min(zoomX, zoomY))
+	.draw(); 
+
+	return this; 
+}
+
+/**
+ * Shows everything that is currently on the screen. 
+ * Changes zoom and center. 
+ * @param {} [margin=5] Margin to use. 
+ * @return ThisExpression
+ */
+gridersize.prototype.showAll = function(margin){
+	var minX = Infinity; 
+	var maxX = -Infinity; 
+
+	var minY = Infinity; 
+	var maxY = -Infinity;
+
+	//get max and mins correctly
+	for(var i=0;i<this.content.length;i++){
+		(function(element){
+			minX = Math.min(element[0], minX); 
+			maxX = Math.max(element[0]+element[2], maxX);
+
+			minY = Math.min(element[1], minY); 
+			maxY = Math.max(element[1]+element[3], maxY);
+		}).call(this, this.content[i]); 
+	}
+
+	this.showRegion(minX, maxX, minY, maxY, margin); 
 
 	return this; 
 }
