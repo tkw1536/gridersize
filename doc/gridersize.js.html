@@ -29,6 +29,10 @@
  * gridersize, version 1.0
  * (c) Tom Wiesing 2014
  * Licensed under MIT
+**/
+
+
+/**
  * @constructor
  * @param {jQuery} canvas A jQuery element to use as canvas, preferably a div. 
  * @return 
@@ -118,7 +122,8 @@ gridersize.prototype.draw = function(){
 		"top": height / 2, 
 		"left": width / 2
 	}).children().each(function(){
-		var box = $(this); 
+		var box = $(this);
+
 		var element = box.data("gridersize.position"); 
 
 		//compute properties of elements to render
@@ -141,6 +146,24 @@ gridersize.prototype.draw = function(){
 			"width": renderDimensions.sizeX, 
 			"height": renderDimensions.sizeY
 		}); 
+
+		//optimize the font size
+
+		//find the sub span and reset the font size
+		var sub = box.find("span").css("font-size", "1em");  
+
+		//max number of adjustment steps
+	   	var fontstep = 2;
+	   	var count = 10;
+
+		while (sub.height()>box.height() || sub.width()>box.width()){
+			var s = parseInt(sub.css('font-size').substr(0,2)); 
+			sub.css('font-size',((s-fontstep)) + 'px').css('line-height',((s)) + 'px');
+
+			if(count-- &lt;= 0){
+				break; 
+			}
+		}
 		
 	}); 
 
@@ -177,6 +200,7 @@ gridersize.prototype._drawElements = function(){
 			var box = $("&lt;div>")
 			.data("gridersize.id", id)
 			.data("gridersize.position", [element[0], element[1], element[2], element[3]])
+			.data("gridersize.clicked", false)
 			.appendTo(origin); 
 
 
@@ -196,17 +220,28 @@ gridersize.prototype._drawElements = function(){
 			})
 			.on("click", function(){
 
-				me.canvas.trigger("gridersize.click", [box, id]); 
+				//trigger a click event and a toggle event
+				me.canvas.trigger("gridersize.click", [box, id]);
+
+				box.trigger("gridersize.toggle"); 
+			})
+			.on("gridersize.toggle", function(){
+				//toggle this box	
+
+				me.canvas.trigger("gridersize.toggle", [box, id]);
 
 				if(box.data("gridersize.clicked") === true){
 					box
 					.data("gridersize.clicked", false)
 					.trigger("gridersize.deactivate"); 
 				} else {
+					me.canvas.trigger("gridersize.focus", [box, id]); 
 
 					box.parent().find("div").each(function(){
 						if($(this).data("gridersize.active") === true){
-							$(this).trigger("gridersize.deactivate"); 
+							$(this)
+							.data("gridersize.clicked", false)
+							.trigger("gridersize.deactivate"); 
 						}
 					}); 
 
@@ -303,6 +338,16 @@ gridersize.prototype._drawElements = function(){
 				box.removeClass(activeClass); 
 			}); 
 
+			/*
+				Set the content
+			*/
+
+			var text = properties["label"] || false; 
+
+			if(typeof text == "string"){
+				box.append($("&lt;span>").text(text)); 
+			}
+
 		}).call(this, this.content[i]); 
 	}
 
@@ -316,7 +361,7 @@ gridersize.prototype._drawElements = function(){
 
 /**
  * Sets the zoom level. 
- * @param {} level Factor to set the zoom to. 
+ * @param {number} level Factor to set the zoom to. 
  * @return ThisExpression
  */
 gridersize.prototype.setZoom = function(level){
@@ -340,54 +385,6 @@ gridersize.prototype.setZoom = function(level){
 }
 
 /**
- * Shows everything that is currently on the screen. 
- * Changes zoom and center. 
- * @return ThisExpression
- */
-gridersize.prototype.showAll = function(){
-
-
-	var minX = Infinity; 
-	var maxX = -Infinity; 
-
-	var minY = Infinity; 
-	var maxY = -Infinity;
-
-	for(var i=0;i&lt;this.content.length;i++){
-		(function(element){
-			minX = Math.min(element[0], minX); 
-			maxX = Math.max(element[0]+element[2], maxX);
-
-			minY = Math.min(element[1], minY); 
-			maxY = Math.max(element[1]+element[3], maxY);
-		}).call(this, this.content[i]); 
-	}
-
-
-	//get max and mins correctly
-
-	//center in the middle of everything
-
-	var centerX = minX+((maxX - minX)/ 2);
-	var centerY = minY+((maxY - minY)/ 2); 
-
-	//compute zoom and have a margin of 5 units
-	var width = this.canvas.width(); 
-	var height = this.canvas.height(); 
-
-	var zoomX = width/(maxX - minX + 5); 
-	var zoomY = height/(maxY - minY + 5); 
-
-	this
-	.setCenter(centerX, centerY)
-	.setZoom(Math.min(zoomX, zoomY))
-	.draw(); 
-
-
-	return this; 
-}
-
-/**
  * Description
  * @param {number} x X-coordinate of the center. 
  * @param {number} y Y-coordinate of the center. 
@@ -406,6 +403,69 @@ gridersize.prototype.setCenter = function(x, y, relative){
 		this.center.x = x; 
 		this.center.y = y; 
 	}
+
+	return this; 
+}
+
+/**
+ * Shows a specific Region. 
+ * @param {number} minX Minimal X Coordinate to show. 
+ * @param {number} maxX Maximal X Coordinate to show. 
+ * @param {number} minY Minimal Y Coordinate to show 
+ * @param {number} maxY Maximal Y Coordinate to show 
+ * @param {number} [margin=5] Margin to use. Defaults to 5. 
+ * @return ThisExpression
+ */
+gridersize.prototype.showRegion = function(minX, maxX, minY, maxY, margin){
+	if(typeof margin !== "number"){
+		var margin = 5; 
+	}
+
+	//center in the middle of the region
+
+	var centerX = minX+((maxX - minX)/ 2);
+	var centerY = minY+((maxY - minY)/ 2); 
+
+	//compute zoom and have a margin of 5 units
+	var width = this.canvas.width(); 
+	var height = this.canvas.height(); 
+
+	var zoomX = width/(maxX - minX + margin); 
+	var zoomY = height/(maxY - minY + margin); 
+
+	this
+	.setCenter(centerX, centerY)
+	.setZoom(Math.min(zoomX, zoomY))
+	.draw(); 
+
+	return this; 
+}
+
+/**
+ * Shows everything that is currently on the screen. 
+ * Changes zoom and center. 
+ * @param {number} [margin=5] Margin to use. 
+ * @return ThisExpression
+ */
+gridersize.prototype.showAll = function(margin){
+	var minX = Infinity; 
+	var maxX = -Infinity; 
+
+	var minY = Infinity; 
+	var maxY = -Infinity;
+
+	//get max and mins correctly
+	for(var i=0;i&lt;this.content.length;i++){
+		(function(element){
+			minX = Math.min(element[0], minX); 
+			maxX = Math.max(element[0]+element[2], maxX);
+
+			minY = Math.min(element[1], minY); 
+			maxY = Math.max(element[1]+element[3], maxY);
+		}).call(this, this.content[i]); 
+	}
+
+	this.showRegion(minX, maxX, minY, maxY, margin); 
 
 	return this; 
 }
@@ -482,6 +542,8 @@ gridersize.prototype.mouse = function(){
 			)
 			.draw(); 
 		}
+
+		me.canvas.trigger("dragmove"); 
 	}; 
 
 	var mouseDown = function(event){
@@ -491,11 +553,21 @@ gridersize.prototype.mouse = function(){
 			dragStart = [me.center.x, me.center.y];
 			dragOrigin = [event.pageX, event.pageY]; 
 		}
+
+		me.canvas.trigger("dragstart"); 
+
+		//set moveable cursor
+		$('html,body').css('cursor','move');
 	}; 
 
 	var mouseEnd = function(){
 		dragStart = undefined; 
 		dragOrigin = undefined; 
+
+		me.canvas.trigger("dragstop"); 
+
+		//set normal cursor
+		$('html,body').css('cursor','initial');
 	}; 
 
 	this.canvas
@@ -519,11 +591,20 @@ gridersize.prototype.mouse = function(){
 	return this; 
 }
 
+/**
+ * Finds an element given its Id. 
+ * @param {string} id Id to find. 
+ * @return jQuery
+ */
 gridersize.prototype.findElementById = function(id){
 	return this.canvas.find("div").filter(function(){try{return $(this).data("gridersize.id").indexOf(id) !== -1; }catch(e){return false; }}); 
 }
 
+/**
+ * @static Version number
+*/
 gridersize.version = "1.0"; 
+
 
 gridersize.prototype.doTheThing = function(){
 	alert("I'm just doing my thing. Move along. "); 
@@ -544,7 +625,7 @@ gridersize.prototype.doTheThing = function(){
 <br clear="both">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha5</a> on Wed May 14 2014 16:14:23 GMT+0200 (CEST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha5</a> on Wed May 14 2014 16:17:53 GMT+0200 (CEST)
 </footer>
 
 <script> prettyPrint(); </script>
