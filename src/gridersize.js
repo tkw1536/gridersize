@@ -142,7 +142,7 @@ gridersize.prototype.draw = function(){
 
 	me.canvas.trigger("gridersize.move"); 
 
-
+	return this; 
 }
 
 /**
@@ -174,6 +174,7 @@ gridersize.prototype._drawElements = function(){
 			.data("gridersize.id", id)
 			.data("gridersize.position", [element[0], element[1], element[2], element[3]])
 			.data("gridersize.clicked", false)
+			.data("gridersize.original", element)
 			.appendTo(origin); 
 
 
@@ -570,7 +571,47 @@ gridersize.prototype.mouse = function(){
  * @return jQuery
  */
 gridersize.prototype.findElementById = function(id){
-	return this.canvas.find("div").filter(function(){try{return $(this).data("gridersize.id").indexOf(id) !== -1; }catch(e){return false; }}); 
+	var allElements = this.canvas.find("div");
+
+	return allElements.filter(function(){
+		try{
+			return $(this).data("gridersize.id").indexOf(id) !== -1; 
+		}catch(e){
+			return false; 
+		}
+	}); 
+}
+
+/**
+ * Finds an element given its Id and activates it. 
+ * @param {string} id Id to find. 
+ * @return jQuery
+ */
+gridersize.prototype.activateElementById = function(id){
+	var element = this.findElementById(id); 
+
+	if(!element.data("gridersize.clicked")){
+		element.trigger("gridersize.toggle"); 
+	}
+
+	return element; 
+}
+
+/**
+ * Deactivates all currently active elements. 
+ * @return ThisExpression
+ */
+gridersize.prototype.deactivateAll = function(){
+	
+	this.canvas.find("div").each(function(i, e){
+		var element = $(this); 
+		if(element.data("gridersize.clicked")){
+			element.trigger("gridersize.toggle"); 
+		}
+	}); 
+
+	return this; 
+	
 }
 
 /**
