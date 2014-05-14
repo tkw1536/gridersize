@@ -469,19 +469,19 @@ gridersize.prototype.keys = function(){
 		} else if(key == 38){
 			//top
 
-			me.setCenter(0, -deltaCenter/me.zoom, true).draw(); 
+			me.setCenter(0, deltaCenter/me.zoom, true).draw(); 
 		} else if(key == 39){
 			//left
 
-			me.setCenter(deltaCenter/me.zoom, 0, true).draw(); 
+			me.setCenter(-deltaCenter/me.zoom, 0, true).draw(); 
 		} else if(key == 40){
 			//down
 
-			me.setCenter(0, deltaCenter/me.zoom, true).draw(); 
+			me.setCenter(0, -deltaCenter/me.zoom, true).draw(); 
 		} else if(key == 37){
 			//right
 			
-			me.setCenter(-deltaCenter/me.zoom, 0, true).draw();
+			me.setCenter(deltaCenter/me.zoom, 0, true).draw();
 		}
 	})
 
