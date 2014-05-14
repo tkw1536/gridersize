@@ -389,6 +389,42 @@ gridersize.prototype.setCenter = function(x, y, relative){
  */
 gridersize.prototype.keys = function(){
 
+	var me = this; 
+
+	var deltaZoom = 2; 
+	var deltaCenter = 10; 
+
+	//Listen to key events
+	$("body").on("keydown", function(evt){
+		var key = evt.keyCode; 
+		if(key == 107 || key == 187){
+			//plus
+			me
+			.setZoom(me.zoom+0.1*deltaZoom)
+			.draw();
+		} else if(key == 109 || key == 189){
+			//minus
+
+			me.setZoom(me.zoom-0.1*deltaZoom).draw();
+		} else if(key == 38){
+			//top
+
+			me.setCenter(0, -deltaCenter/me.zoom, true).draw(); 
+		} else if(key == 39){
+			//left
+
+			me.setCenter(deltaCenter/me.zoom, 0, true).draw(); 
+		} else if(key == 40){
+			//down
+
+			me.setCenter(0, deltaCenter/me.zoom, true).draw(); 
+		} else if(key == 37){
+			//right
+			
+			me.setCenter(-deltaCenter/me.zoom, 0, true).draw();
+		}
+	})
+
 	return this; 
 }
 
